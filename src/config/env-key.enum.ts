@@ -4,5 +4,6 @@ export enum EnvKey {
   AiModel = "AI_MODEL",
   AiProvider = "AI_PROVIDER",
   CorsOrigin = "CORS_ORIGIN",
+  Host = "HOST",
   Port = "PORT"
 }

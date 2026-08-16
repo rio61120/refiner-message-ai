@@ -10,6 +10,14 @@ cp .env.example .env
 npm run start:dev
 ```
 
+## Docker
+
+```bash
+docker compose up --build
+```
+
+The compose service reads runtime config from `.env`, publishes the API on `127.0.0.1:3001`, and sets `HOST=0.0.0.0` inside the container so the mapped port is reachable from the host machine.
+
 Required env:
 
 ```bash

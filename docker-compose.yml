@@ -1,0 +1,15 @@
+services:
+  refiner-message-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: refiner-message-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3001
+      NODE_ENV: production
+    ports:
+      - "3001:3001"

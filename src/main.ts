@@ -51,7 +51,9 @@ async function bootstrap(): Promise<void> {
   );
 
   const port = configService.get<number>(EnvKey.Port) || DEFAULT_PORT;
-  await app.listen(port, DEFAULT_HOST);
+  const host = configService.get<string>(EnvKey.Host) || DEFAULT_HOST;
+
+  await app.listen(port, host);
 }
 
 void bootstrap();
