@@ -5,7 +5,8 @@
   "description": "NestJS backend for streaming refined chat messages.",
   "scripts": {
     "build": "nest build && tsc-alias -p tsconfig.build.json",
-    "start": "node dist/main.js",
+    "start": "npm run build && node dist/main.js",
+    "start:prod": "node dist/main.js",
     "start:dev": "nest start --watch",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit"
