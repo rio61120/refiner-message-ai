@@ -1,8 +1,8 @@
 {
-  "name": "refiner-message-backend",
+  "name": "warriorai",
   "version": "0.1.0",
   "private": true,
-  "description": "NestJS backend for streaming refined chat messages.",
+  "description": "NestJS backend for warriorAI message refinement.",
   "scripts": {
     "build": "nest build && tsc-alias -p tsconfig.build.json",
     "start": "npm run build && node dist/main.js",

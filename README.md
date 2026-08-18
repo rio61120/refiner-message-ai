@@ -1,6 +1,6 @@
-# Refiner Message Backend
+# warriorAI
 
-NestJS backend for streaming message refinement results to the Chrome extension.
+NestJS backend for streaming warriorAI message refinement results to the Chrome extension.
 
 ## Setup
 

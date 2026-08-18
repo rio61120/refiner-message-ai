@@ -1,9 +1,9 @@
 services:
-  refiner-message-backend:
+  warriorai:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: refiner-message-backend
+    container_name: warriorai
     restart: unless-stopped
     env_file:
       - .env
