@@ -1,9 +1,15 @@
 export enum EnvKey {
+  AccessTokenTtlSeconds = "ACCESS_TOKEN_TTL_SECONDS",
   AiApiKey = "AI_API_KEY",
   AiBaseUrl = "AI_BASE_URL",
   AiModel = "AI_MODEL",
   AiProvider = "AI_PROVIDER",
   CorsOrigin = "CORS_ORIGIN",
+  DatabaseUrl = "DATABASE_URL",
   Host = "HOST",
-  Port = "PORT"
+  JwtSecret = "JWT_SECRET",
+  Port = "PORT",
+  RedisHost = "REDIS_HOST",
+  RedisPassword = "REDIS_PASSWORD",
+  RedisPort = "REDIS_PORT"
 }

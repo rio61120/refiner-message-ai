@@ -7,6 +7,7 @@ NestJS backend for streaming warriorAI message refinement results to the Chrome 
 ```bash
 npm install
 cp .env.example .env
+npm run prisma:migrate
 npm run start:dev
 ```
 
@@ -25,6 +26,11 @@ AI_PROVIDER=openai-compatible
 AI_API_KEY=your_key
 AI_BASE_URL=https://your-openai-compatible-gateway/v1
 AI_MODEL=gpt-4o-mini
+DATABASE_URL=postgresql://warriorai:warriorai@localhost:5432/warriorai?schema=public
+JWT_SECRET=replace-with-a-long-random-secret
+ACCESS_TOKEN_TTL_SECONDS=604800
+REDIS_HOST=localhost
+REDIS_PORT=6379
 ```
 
 `CORS_ORIGIN` accepts comma-separated origins or full URLs. Full URLs are normalized to their origin, so `https://mail.google.com/mail/u/0/#chat/...` becomes `https://mail.google.com`.
@@ -35,6 +41,33 @@ Supported providers:
 - `openai-compatible`: any gateway with OpenAI-compatible chat completions
 
 ## API
+
+Auth endpoints:
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me`
+- `POST /auth/logout`
+
+`/auth/register` and `/auth/login` return an access token:
+
+```json
+{
+  "accessToken": "jwt_token",
+  "expiresAt": "2026-08-25T00:00:00.000Z",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "User"
+  }
+}
+```
+
+All non-public endpoints require:
+
+```http
+Authorization: Bearer jwt_token
+```
 
 `POST /refine`
 
