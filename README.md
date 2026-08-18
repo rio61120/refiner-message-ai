@@ -1,6 +1,6 @@
 # warriorAI
 
-NestJS backend for streaming warriorAI message refinement results to the Chrome extension.
+NestJS backend for authenticated warriorAI APIs backed by PostgreSQL, Redis, BullMQ, and a reusable AI layer.
 
 ## Setup
 
@@ -57,7 +57,7 @@ Auth endpoints:
   "expiresAt": "2026-08-25T00:00:00.000Z",
   "user": {
     "id": "uuid",
-    "email": "user@example.com",
+    "user_name": "user_name",
     "name": "User"
   }
 }
@@ -69,9 +69,20 @@ All non-public endpoints require:
 Authorization: Bearer jwt_token
 ```
 
+`POST /ai/chat`
+
+Generic AI chat endpoint. Returns `text/event-stream`.
+
+```json
+{
+  "prompt": "Write a short launch announcement for warriorAI.",
+  "systemPrompt": "You are a concise product copywriter."
+}
+```
+
 `POST /refine`
 
-Returns `text/event-stream`.
+Message refinement endpoint built on top of the shared AI layer. Returns `text/event-stream`.
 
 ```json
 {
@@ -86,3 +97,9 @@ Events:
 - `delta`: streamed text chunk
 - `done`: final signal
 - `error`: failure message
+
+## Structure
+
+- `src/ai`: reusable AI API, LLM provider integration, and prompt templates
+- `src/refine`: refine-specific API and request orchestration
+- `src/auth`: authentication, sessions, and global API guard

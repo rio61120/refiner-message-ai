@@ -1,22 +1,23 @@
 import { Injectable } from "@nestjs/common";
 
+import { AiService } from "@app/ai/ai.service";
+import { buildRefinePrompt } from "@app/ai/prompts/templates/refine.prompt";
 import { RefineRequestDto } from "@app/refine/dto/refine-request.dto";
 import { RefineAction } from "@app/refine/enums/refine-action.enum";
-import { LlmRefineService } from "@app/refine/llm/llm-refine.service";
-import { buildRefineMessages } from "@app/refine/prompts/refine.prompt";
+import { DEFAULT_TARGET_LANGUAGE } from "@app/refine/refine.constants";
 
 @Injectable()
 export class RefineService {
-  constructor(private readonly llmRefineService: LlmRefineService) {}
+  constructor(private readonly aiService: AiService) {}
 
   async *streamRefinedMessage(request: RefineRequestDto): AsyncIterable<string> {
-    const messages = buildRefineMessages({
+    const prompt = buildRefinePrompt({
       action: request.action,
       message: request.message,
-      targetLanguage: request.targetLanguage
+      targetLanguage: request.targetLanguage || DEFAULT_TARGET_LANGUAGE
     });
 
-    yield* this.llmRefineService.stream(messages);
+    yield* this.aiService.streamPrompt(prompt);
   }
 
   getSupportedActions(): RefineAction[] {

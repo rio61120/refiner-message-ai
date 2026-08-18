@@ -16,8 +16,14 @@ import { DEFAULT_ACCESS_TOKEN_TTL_SECONDS } from "@app/auth/auth.constants";
 
 interface AccessTokenPayload {
   sub: string;
-  email: string;
+  user_name?: string;
   sid: string;
+}
+
+interface AuthUserRecord {
+  id: string;
+  userName: string;
+  name: string | null;
 }
 
 @Injectable()
@@ -34,7 +40,7 @@ export class AuthService {
     try {
       const user = await this.prisma.user.create({
         data: {
-          email: request.email.toLowerCase(),
+          userName: this.normalizeUserName(request.user_name),
           passwordHash,
           name: request.name?.trim() || null
         }
@@ -43,7 +49,7 @@ export class AuthService {
       return this.createSession(user);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        throw new ConflictException("Email is already registered");
+        throw new ConflictException("User name is already registered");
       }
 
       throw error;
@@ -52,11 +58,11 @@ export class AuthService {
 
   async login(request: LoginRequestDto): Promise<AuthResponseDto> {
     const user = await this.prisma.user.findUnique({
-      where: { email: request.email.toLowerCase() }
+      where: { userName: this.normalizeUserName(request.user_name) }
     });
 
     if (!user || !(await compare(request.password, user.passwordHash))) {
-      throw new UnauthorizedException("Invalid email or password");
+      throw new UnauthorizedException("Invalid user name or password");
     }
 
     return this.createSession(user);
@@ -90,7 +96,7 @@ export class AuthService {
 
     return {
       id: session.user.id,
-      email: session.user.email,
+      user_name: session.user.userName,
       name: session.user.name,
       sessionId: session.id
     };
@@ -108,7 +114,7 @@ export class AuthService {
     });
   }
 
-  private async createSession(user: AuthUserResponse): Promise<AuthResponseDto> {
+  private async createSession(user: AuthUserRecord): Promise<AuthResponseDto> {
     const ttlSeconds = this.getAccessTokenTtlSeconds();
     const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
     const sessionId = randomUUID();
@@ -116,7 +122,7 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(
       {
         sub: user.id,
-        email: user.email,
+        user_name: user.userName,
         sid: sessionId
       } satisfies AccessTokenPayload,
       {
@@ -141,12 +147,16 @@ export class AuthService {
     };
   }
 
-  private serializeUser(user: AuthUserResponse): AuthUserResponse {
+  private serializeUser(user: AuthUserRecord): AuthUserResponse {
     return {
       id: user.id,
-      email: user.email,
+      user_name: user.userName,
       name: user.name
     };
+  }
+
+  private normalizeUserName(userName: string): string {
+    return userName.trim().toLowerCase();
   }
 
   private hashToken(token: string): string {

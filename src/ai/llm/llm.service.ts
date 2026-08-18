@@ -4,11 +4,11 @@ import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 import { EnvKey } from "@app/config/env-key.enum";
-import { AiProvider } from "@app/refine/llm/ai-provider.enum";
-import { DEFAULT_AI_MODEL, DEFAULT_AI_PROVIDER, STREAM_TEMPERATURE } from "@app/refine/llm/llm.constants";
+import { AiProvider } from "@app/ai/llm/ai-provider.enum";
+import { DEFAULT_AI_MODEL, DEFAULT_AI_PROVIDER, STREAM_TEMPERATURE } from "@app/ai/llm/llm.constants";
 
 @Injectable()
-export class LlmRefineService {
+export class LlmService {
   private readonly openai?: OpenAI;
   private readonly model: string;
   private readonly provider: AiProvider;

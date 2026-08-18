@@ -2,7 +2,7 @@ import type { Request } from "express";
 
 export interface AuthenticatedUser {
   id: string;
-  email: string;
+  user_name: string;
   name: string | null;
 }
 

@@ -29,7 +29,7 @@ export class JwtAuthGuard implements CanActivate {
 
     request.user = {
       id: user.id,
-      email: user.email,
+      user_name: user.user_name,
       name: user.name
     };
     request.authToken = token;

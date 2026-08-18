@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
 
-import { LlmModule } from "@app/refine/llm/llm.module";
+import { AiModule } from "@app/ai/ai.module";
 import { RefineController } from "@app/refine/refine.controller";
 import { RefineService } from "@app/refine/refine.service";
 
 @Module({
-  imports: [LlmModule],
+  imports: [AiModule],
   controllers: [RefineController],
   providers: [RefineService]
 })
