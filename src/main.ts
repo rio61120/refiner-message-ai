@@ -3,7 +3,6 @@ import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
-import type { NextFunction, Request, Response } from "express";
 
 import { AppModule } from "@app/app.module";
 import { DEFAULT_HOST, DEFAULT_PORT } from "@app/config/app.constants";
@@ -13,31 +12,11 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.use((request: Request, response: Response, next: NextFunction) => {
-    const requestedHeaders = request.headers["access-control-request-headers"];
-
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    response.setHeader(
-      "Access-Control-Allow-Headers",
-      typeof requestedHeaders === "string"
-        ? requestedHeaders
-        : "Content-Type, Accept, Authorization, X-Requested-With"
-    );
-    response.setHeader("Access-Control-Allow-Private-Network", "true");
-
-    if (request.method === "OPTIONS") {
-      response.status(204).end();
-      return;
-    }
-
-    next();
-  });
-
   app.enableCors({
     origin: "*",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["*"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Accept", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["Content-Length", "Content-Type"],
     optionsSuccessStatus: 204,
     credentials: false
   });
