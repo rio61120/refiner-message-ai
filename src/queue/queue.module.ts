@@ -2,21 +2,17 @@ import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import { EnvKey } from "@app/config/env-key.enum";
+import { getBullMqRedisOptions } from "@app/config/redis.config";
 
 @Module({
   imports: [
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>(EnvKey.RedisHost) || "localhost",
-          port: Number(configService.get<string>(EnvKey.RedisPort) || 6379),
-          password: configService.get<string>(EnvKey.RedisPassword) || undefined
-        }
-      })
-    })
+        connection: getBullMqRedisOptions(configService),
+      }),
+    }),
   ],
-  exports: [BullModule]
+  exports: [BullModule],
 })
 export class QueueModule {}

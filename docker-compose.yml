@@ -9,8 +9,7 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql://warriorai:warriorai@postgres:5432/warriorai?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
       PORT: 3001
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}

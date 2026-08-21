@@ -9,7 +9,5 @@ export enum EnvKey {
   Host = "HOST",
   JwtSecret = "JWT_SECRET",
   Port = "PORT",
-  RedisHost = "REDIS_HOST",
-  RedisPassword = "REDIS_PASSWORD",
-  RedisPort = "REDIS_PORT"
+  RedisUrl = "REDIS_URL"
 }

@@ -1,65 +1,92 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import OpenAI from "openai";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type { LanguageModel, ModelMessage } from "ai";
 
 import { EnvKey } from "@app/config/env-key.enum";
-import { AiProvider } from "@app/ai/llm/ai-provider.enum";
-import { DEFAULT_AI_MODEL, DEFAULT_AI_PROVIDER, STREAM_TEMPERATURE } from "@app/ai/llm/llm.constants";
+import {
+  DEFAULT_AI_MODEL,
+  DEFAULT_AI_PROVIDER,
+  STREAM_TEMPERATURE,
+} from "@app/ai/llm/llm.constants";
+
+type AiSdkModule = typeof import("ai");
+type OpenAiSdkModule = typeof import("@ai-sdk/openai");
+type DynamicImport = <TModule>(specifier: string) => Promise<TModule>;
+
+// Preserve native dynamic import after CommonJS compilation; AI SDK packages are ESM-only.
+const dynamicImport = new Function(
+  "specifier",
+  "return import(specifier)",
+) as DynamicImport;
 
 @Injectable()
 export class LlmService {
-  private readonly openai?: OpenAI;
+  private readonly aiSdk: Promise<AiSdkModule>;
+  private readonly languageModel: Promise<LanguageModel>;
   private readonly model: string;
-  private readonly provider: AiProvider;
+  private readonly provider: string;
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>(EnvKey.AiApiKey);
-    const baseURL = this.configService.get<string>(EnvKey.AiBaseUrl);
-    this.provider = this.resolveProvider();
-
-    if (apiKey) {
-      this.openai = new OpenAI({
-        apiKey,
-        baseURL: this.provider === AiProvider.OpenAiCompatible ? baseURL : undefined
-      });
-    }
-
-    this.model = this.configService.get<string>(EnvKey.AiModel) || DEFAULT_AI_MODEL;
+    this.provider = this.getConfiguredProvider();
+    this.model =
+      this.configService.get<string>(EnvKey.AiModel) || DEFAULT_AI_MODEL;
+    this.aiSdk = dynamicImport<AiSdkModule>("ai");
+    this.languageModel = this.createLanguageModel();
   }
 
-  async *stream(messages: ChatCompletionMessageParam[]): AsyncIterable<string> {
-    if (!this.openai) {
+  async *stream(messages: ModelMessage[]): AsyncIterable<string> {
+    const [{ streamText }, languageModel] = await Promise.all([
+      this.aiSdk,
+      this.languageModel,
+    ]);
+
+    const result = streamText({
+      allowSystemInMessages: true,
+      messages,
+      model: languageModel,
+      temperature: STREAM_TEMPERATURE,
+    });
+
+    for await (const textPart of result.textStream) {
+      yield textPart;
+    }
+  }
+
+  private async createLanguageModel(): Promise<LanguageModel> {
+    const apiKey = this.configService.get<string>(EnvKey.AiApiKey);
+    const baseURL = this.configService.get<string>(EnvKey.AiBaseUrl);
+
+    if (!baseURL) {
+      return this.getGatewayModel();
+    }
+
+    if (!apiKey) {
       throw new InternalServerErrorException("AI_API_KEY is not configured");
     }
 
-    if (this.provider === AiProvider.OpenAiCompatible && !this.configService.get<string>(EnvKey.AiBaseUrl)) {
-      throw new InternalServerErrorException("AI_BASE_URL is required when AI_PROVIDER is openai-compatible");
-    }
-
-    const stream = await this.openai.chat.completions.create({
-      model: this.model,
-      messages,
-      temperature: STREAM_TEMPERATURE,
-      stream: true
+    const { createOpenAI } =
+      await dynamicImport<OpenAiSdkModule>("@ai-sdk/openai");
+    const provider = createOpenAI({
+      apiKey,
+      baseURL,
+      name: this.provider,
     });
 
-    for await (const part of stream) {
-      const content = part.choices[0]?.delta?.content;
-
-      if (content) {
-        yield content;
-      }
-    }
+    return provider.chat(this.model);
   }
 
-  private resolveProvider(): AiProvider {
-    const provider = this.configService.get<string>(EnvKey.AiProvider) || DEFAULT_AI_PROVIDER;
-
-    if (Object.values(AiProvider).includes(provider as AiProvider)) {
-      return provider as AiProvider;
+  private getGatewayModel(): string {
+    if (this.provider === DEFAULT_AI_PROVIDER || this.model.includes("/")) {
+      return this.model;
     }
 
-    throw new InternalServerErrorException(`Unsupported AI_PROVIDER: ${provider}`);
+    return `${this.provider}/${this.model}`;
+  }
+
+  private getConfiguredProvider(): string {
+    return (
+      this.configService.get<string>(EnvKey.AiProvider)?.trim() ||
+      DEFAULT_AI_PROVIDER
+    );
   }
 }

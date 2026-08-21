@@ -22,23 +22,22 @@ The compose service reads runtime config from `.env`, publishes the API on `127.
 Required env:
 
 ```bash
-AI_PROVIDER=openai-compatible
-AI_API_KEY=your_key
-AI_BASE_URL=https://your-openai-compatible-gateway/v1
-AI_MODEL=gpt-4o-mini
+AI_PROVIDER=vercel
+AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
+AI_MODEL=openai/gpt-4o-mini
 DATABASE_URL=postgresql://warriorai:warriorai@localhost:5432/warriorai?schema=public
 JWT_SECRET=replace-with-a-long-random-secret
 ACCESS_TOKEN_TTL_SECONDS=604800
-REDIS_HOST=localhost
-REDIS_PORT=6379
+REDIS_URL=redis://localhost:6379
 ```
 
 `CORS_ORIGIN` accepts comma-separated origins or full URLs. Full URLs are normalized to their origin, so `https://mail.google.com/mail/u/0/#chat/...` becomes `https://mail.google.com`.
 
-Supported providers:
+Provider config:
 
-- `openai`: official OpenAI API
-- `openai-compatible`: any gateway with OpenAI-compatible chat completions
+- Vercel AI Gateway: leave `AI_BASE_URL` empty and set `AI_MODEL` to a gateway model id, for example `openai/gpt-4o-mini` or `anthropic/claude-sonnet-4-5`.
+- Gateway shorthand: set `AI_PROVIDER=anthropic` and `AI_MODEL=claude-sonnet-4-5`; the app sends `anthropic/claude-sonnet-4-5` to the AI SDK.
+- OpenAI-compatible gateway: set any `AI_PROVIDER` name, plus `AI_API_KEY`, `AI_BASE_URL`, and the raw `AI_MODEL` served by that endpoint.
 
 ## API
 

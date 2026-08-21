@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "NestJS backend for warriorAI message refinement.",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "nest build && tsc-alias -p tsconfig.build.json",
     "prisma:generate": "prisma generate",
@@ -15,6 +18,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.44",
+    "@nestjs-modules/ioredis": "^2.2.2",
     "@nestjs/bullmq": "11.0.5",
     "@nestjs/common": "11.2.1",
     "@nestjs/config": "4.0.4",
@@ -22,12 +27,12 @@
     "@nestjs/jwt": "11.0.2",
     "@nestjs/platform-express": "11.2.1",
     "@prisma/client": "6.12.0",
+    "ai": "^7.0.70",
     "bcryptjs": "^3.0.3",
     "bullmq": "^6.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "ioredis": "^6.0.0",
-    "openai": "^4.77.0",
     "prisma": "6.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

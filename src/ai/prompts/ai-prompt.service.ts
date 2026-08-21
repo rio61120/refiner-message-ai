@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { ModelMessage } from "ai";
 
 export interface AiPromptInput {
   systemPrompt: string;
@@ -8,16 +8,16 @@ export interface AiPromptInput {
 
 @Injectable()
 export class AiPromptService {
-  buildMessages(input: AiPromptInput): ChatCompletionMessageParam[] {
+  buildMessages(input: AiPromptInput): ModelMessage[] {
     return [
       {
         role: "system",
-        content: input.systemPrompt
+        content: input.systemPrompt,
       },
       {
         role: "user",
-        content: input.userPrompt
-      }
+        content: input.userPrompt,
+      },
     ];
   }
 }
